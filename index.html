@@ -1,75 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mini Code Playground 🚀</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Secure Notice Board</title>
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:white;
+}
 
-  <style>
-    textarea {
-      font-family: monospace;
-    }
-  </style>
+.board{
+  width:95%;
+  max-width:800px;
+  background:#111;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,.5);
+}
+
+.title{
+  text-align:center;
+  font-size:24px;
+  margin-bottom:15px;
+}
+
+/* scrolling */
+.marquee{
+  overflow:hidden;
+  white-space:nowrap;
+  border:2px solid cyan;
+  padding:10px;
+  border-radius:10px;
+}
+
+.marquee span{
+  display:inline-block;
+  padding-left:100%;
+  animation:scroll 15s linear infinite;
+  font-weight:bold;
+  color:cyan;
+}
+
+@keyframes scroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-100%)}
+}
+
+.controls{
+  display:none;
+  margin-top:15px;
+  gap:10px;
+}
+
+input{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+}
+
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.loginBtn{background:#00c853;}
+.add{background:#2196f3;}
+.logout{background:#ff5252;}
+
+.small{
+  font-size:12px;
+  opacity:.6;
+  text-align:center;
+  margin-top:10px;
+}
+</style>
 </head>
 
-<body class="bg-gray-900 text-white h-screen flex flex-col">
+<body>
 
-  <!-- Header -->
-  <div class="p-3 bg-gray-800 flex justify-between items-center">
-    <h1 class="text-xl font-bold">⚡ Apna Code Playground</h1>
-    <button onclick="runCode()"
-      class="bg-green-500 px-4 py-2 rounded hover:bg-green-600">
-      ▶ Run Code
-    </button>
+<div class="board">
+
+  <div class="title">📢 Smart Notice Board</div>
+
+  <div class="marquee">
+    <span id="noticeText"></span>
   </div>
 
-  <!-- Editor Section -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1 p-2">
-
-    <!-- HTML -->
-    <textarea id="htmlCode"
-      class="bg-black p-3 rounded resize-none"
-      placeholder="HTML likho yaha..."></textarea>
-
-    <!-- CSS -->
-    <textarea id="cssCode"
-      class="bg-black p-3 rounded resize-none"
-      placeholder="CSS likho yaha..."></textarea>
-
-    <!-- JS -->
-    <textarea id="jsCode"
-      class="bg-black p-3 rounded resize-none"
-      placeholder="JavaScript likho yaha..."></textarea>
-
+  <!-- Teacher login -->
+  <div style="margin-top:15px;display:flex;gap:10px">
+    <input type="password" id="pass" placeholder="Teacher password">
+    <button class="loginBtn" onclick="login()">Login</button>
   </div>
 
-  <!-- Output -->
-  <div class="h-1/2 bg-white">
-    <iframe id="output" class="w-full h-full"></iframe>
+  <!-- Teacher controls -->
+  <div class="controls" id="controls">
+    <input id="noticeInput" placeholder="Type notice">
+    <button class="add" onclick="addNotice()">Add</button>
+    <button class="logout" onclick="logout()">Logout</button>
   </div>
 
+  <div class="small">
+    Students 👀 only view | Teacher 🔐 edit
+  </div>
 
-  <script>
-    function runCode() {
-      const html = document.getElementById("htmlCode").value;
-      const css = document.getElementById("cssCode").value;
-      const js = document.getElementById("jsCode").value;
+</div>
 
-      const output = document.getElementById("output");
 
-      output.srcdoc = `
-        <html>
-        <style>${css}</style>
-        <body>
-          ${html}
-          <script>${js}<\/script>
-        </body>
-        </html>
-      `;
-    }
-  </script>
+<script>
+const PASSWORD = "teacher123"; // change password here
+
+let notices = [
+  "Welcome Students 🎉",
+  "Class starts at 9 AM 🕘"
+];
+
+const text = document.getElementById("noticeText");
+const controls = document.getElementById("controls");
+
+function updateBoard(){
+  text.innerText = notices.join("   🔹   ");
+}
+
+function login(){
+  const val = document.getElementById("pass").value;
+
+  if(val === PASSWORD){
+    controls.style.display = "flex";
+    alert("Login Success 😎 Teacher mode ON");
+  } else {
+    alert("Wrong password ❌");
+  }
+}
+
+function logout(){
+  controls.style.display = "none";
+  alert("Logged out 👋");
+}
+
+function addNotice(){
+  const val = document.getElementById("noticeInput").value;
+  if(!val) return;
+
+  notices.push(val);
+  document.getElementById("noticeInput").value="";
+  updateBoard();
+}
+
+updateBoard();
+</script>
 
 </body>
 </html>
