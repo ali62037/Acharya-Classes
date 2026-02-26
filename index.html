@@ -2,162 +2,217 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Secure Notice Board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Qalamweb CRM</title>
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+
 body{
-  font-family: Arial;
-  margin:0;
-  background:linear-gradient(135deg,#141e30,#243b55);
+  min-height:100vh;
+  background:linear-gradient(135deg,#667eea,#764ba2);
   display:flex;
-  justify-content:center;
   align-items:center;
-  height:100vh;
-  color:white;
+  justify-content:center;
+  padding:15px;
 }
 
-.board{
-  width:95%;
-  max-width:800px;
-  background:#111;
-  padding:20px;
-  border-radius:15px;
-  box-shadow:0 10px 25px rgba(0,0,0,.5);
+.card{
+  background:#fff;
+  width:100%;
+  max-width:420px;
+  border-radius:14px;
+  padding:22px;
+  box-shadow:0 15px 40px rgba(0,0,0,.2);
 }
 
-.title{
-  text-align:center;
-  font-size:24px;
-  margin-bottom:15px;
-}
+h2{text-align:center;margin-bottom:10px;color:#333}
 
-/* scrolling */
-.marquee{
-  overflow:hidden;
-  white-space:nowrap;
-  border:2px solid cyan;
-  padding:10px;
-  border-radius:10px;
-}
+label{font-size:14px;margin-bottom:6px;display:block;color:#444}
 
-.marquee span{
-  display:inline-block;
-  padding-left:100%;
-  animation:scroll 15s linear infinite;
-  font-weight:bold;
-  color:cyan;
-}
-
-@keyframes scroll{
-  0%{transform:translateX(0)}
-  100%{transform:translateX(-100%)}
-}
-
-.controls{
-  display:none;
-  margin-top:15px;
-  gap:10px;
-}
-
-input{
-  padding:8px;
-  border:none;
-  border-radius:6px;
+input,button{
+  width:100%;
+  padding:12px;
+  margin-bottom:14px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:14px;
 }
 
 button{
-  padding:8px 12px;
+  background:#667eea;
+  color:#fff;
   border:none;
-  border-radius:6px;
-  cursor:pointer;
   font-weight:bold;
+  cursor:pointer;
 }
 
-.loginBtn{background:#00c853;}
-.add{background:#2196f3;}
-.logout{background:#ff5252;}
+button:hover{background:#5a6fdc}
 
-.small{
-  font-size:12px;
-  opacity:.6;
-  text-align:center;
+.hidden{display:none}
+
+.brand-top{text-align:center;font-weight:bold;margin-bottom:4px}
+
+.crm-text{text-align:center;font-size:24px;font-weight:900;letter-spacing:2px;margin-bottom:16px}
+
+.note{text-align:center;font-size:12px;color:#777;margin-top:10px}
+
+/* CSV TABLE */
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
   margin-top:10px;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+  font-size:13px;
+  text-align:left;
+}
+
+th{
+  background:#667eea;
+  color:white;
 }
 </style>
 </head>
 
 <body>
 
-<div class="board">
+<!-- LOGIN -->
+<div class="card" id="loginPage">
+  <div class="brand-top">QalamWeb Technologies ✅</div>
+  <div class="crm-text">CRM</div>
 
-  <div class="title">📢 Smart Notice Board</div>
+  <h2>🔐 Login</h2>
 
-  <div class="marquee">
-    <span id="noticeText"></span>
-  </div>
+  <label>Username</label>
+  <input id="username" placeholder="Enter username">
 
-  <!-- Teacher login -->
-  <div style="margin-top:15px;display:flex;gap:10px">
-    <input type="password" id="pass" placeholder="Teacher password">
-    <button class="loginBtn" onclick="login()">Login</button>
-  </div>
+  <label>Password</label>
+  <input type="password" id="password" placeholder="Enter password">
 
-  <!-- Teacher controls -->
-  <div class="controls" id="controls">
-    <input id="noticeInput" placeholder="Type notice">
-    <button class="add" onclick="addNotice()">Add</button>
-    <button class="logout" onclick="logout()">Logout</button>
-  </div>
+  <button onclick="login()">Login</button>
 
-  <div class="small">
-    Students 👀 only view | Teacher 🔐 edit
-  </div>
-
+  <p class="note">Powered by <b>QalamWeb Technologies ✅</b></p>
 </div>
 
+<!-- MAIN PAGE -->
+<div class="card hidden" id="messagePage">
+
+  <h2>📩 WhatsApp Sender</h2>
+
+  <label>Company Name</label>
+  <input id="business" placeholder="Company Name">
+
+  <label>Mobile Number</label>
+  <input id="mobile" placeholder="9876543210">
+
+  <button onclick="sendWhatsApp()">📲 Send on WhatsApp</button>
+
+  <hr style="margin:15px 0">
+
+  <!-- CSV SECTION -->
+  <h2>📂 CSV Reader</h2>
+
+  <input type="file" accept=".csv" onchange="readCSV(event)">
+
+  <div class="table-wrap">
+    <table id="csvTable"></table>
+  </div>
+
+  <p class="note">Powered by <b>QalamWeb Technologies ✅</b></p>
+</div>
 
 <script>
-const PASSWORD = "teacher123"; // change password here
-
-let notices = [
-  "Welcome Students 🎉",
-  "Class starts at 9 AM 🕘"
-];
-
-const text = document.getElementById("noticeText");
-const controls = document.getElementById("controls");
-
-function updateBoard(){
-  text.innerText = notices.join("   🔹   ");
-}
 
 function login(){
-  const val = document.getElementById("pass").value;
+  const u = username.value.trim();
+  const p = password.value.trim();
 
-  if(val === PASSWORD){
-    controls.style.display = "flex";
-    alert("Login Success 😎 Teacher mode ON");
-  } else {
-    alert("Wrong password ❌");
+  if(u === 'Ali' && p === 'Shere'){
+    alert("Welcome " + u + " 😎");
+    loginPage.classList.add('hidden');
+    messagePage.classList.remove('hidden');
+  }else{
+    alert("Wrong login 😅");
   }
 }
 
-function logout(){
-  controls.style.display = "none";
-  alert("Logged out 👋");
+function sendWhatsApp(){
+  const business = document.getElementById('business').value.trim();
+  const mobile = document.getElementById('mobile').value.trim();
+
+  if(!business || !mobile){
+    alert('Business name aur number dono daalo');
+    return;
+  }
+
+  const msg = `Hello Sir,
+
+I am Shere Ali, a Frontend Developer with internship experience at NEO TECHNOVATION.
+
+I came across ${business} and was impressed by your work.
+
+I have hands-on experience in HTML, CSS, JavaScript, and React.
+
+I am currently looking for a Junior Frontend Developer role and can join immediately.
+
+Please let me know if I can share my CV for your consideration.`;
+
+  const cleanNumber = mobile.replace(/\s+/g,''); // remove any space
+
+  const url = `https://wa.me/91${cleanNumber}?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+
+  document.getElementById('business').value='';
+  document.getElementById('mobile').value='';
 }
 
-function addNotice(){
-  const val = document.getElementById("noticeInput").value;
-  if(!val) return;
 
-  notices.push(val);
-  document.getElementById("noticeInput").value="";
-  updateBoard();
+/* CLEAN CSV READER */
+
+function readCSV(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(){
+    const lines = reader.result.split("\n");
+    const table = document.getElementById("csvTable");
+    table.innerHTML = "";
+
+    lines.forEach((line,index)=>{
+
+      line = line.replace(/\r/g,"").trim();
+
+      if(line === "") return;
+
+      const row = document.createElement("tr");
+
+      const cells = line.split(",");
+
+      cells.forEach(cell=>{
+        const cleanCell = cell.trim();
+        const el = document.createElement(index===0?"th":"td");
+        el.innerText = cleanCell;
+        row.appendChild(el);
+      });
+
+      table.appendChild(row);
+    });
+  };
+
+  reader.readAsText(file);
 }
 
-updateBoard();
 </script>
 
 </body>
